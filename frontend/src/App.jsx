@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react';
 
-// Vite bakes VITE_-prefixed vars in at BUILD time, unlike the backend's
-// DATABASE_URL/APP_API_KEY which are read at runtime — deliberately here to
-// exercise the build-time vs runtime env var distinction during diagnosis.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 function App() {

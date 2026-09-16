@@ -52,9 +52,6 @@ app.post('/api/items', async (req, res, next) => {
   }
 });
 
-// Exercises Puppeteer/Chromium — a common real deploy failure: this builds fine
-// but crashes at runtime if the container image is missing Chromium's shared
-// system libraries (libnss3, libatk-bridge2.0-0, libgbm1, etc).
 app.get('/api/screenshot', async (req, res, next) => {
   const targetUrl = req.query.url;
   if (!targetUrl) {
@@ -78,8 +75,6 @@ app.get('/api/screenshot', async (req, res, next) => {
   }
 });
 
-// Deliberately throws if a required env var isn't configured — mirrors the
-// missing-env-var crash pattern used to test diagnose_deploy_failure.
 app.get('/api/config-check', (req, res) => {
   const appApiKey = process.env.APP_API_KEY;
   if (!appApiKey) {
