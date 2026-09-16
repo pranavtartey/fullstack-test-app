@@ -1,0 +1,63 @@
+import { useEffect, useState } from 'react';
+
+// Vite bakes VITE_-prefixed vars in at BUILD time, unlike the backend's
+// DATABASE_URL/APP_API_KEY which are read at runtime — deliberately here to
+// exercise the build-time vs runtime env var distinction during diagnosis.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
+function App() {
+  const [items, setItems] = useState([]);
+  const [name, setName] = useState('');
+  const [error, setError] = useState(null);
+
+  async function loadItems() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/items`);
+      if (!res.ok) throw new Error(`Backend returned ${res.status}`);
+      setItems(await res.json());
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  useEffect(() => {
+    loadItems();
+  }, []);
+
+  async function addItem(e) {
+    e.preventDefault();
+    if (!name.trim()) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      if (!res.ok) throw new Error(`Backend returned ${res.status}`);
+      setName('');
+      loadItems();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  return (
+    <div style={{ fontFamily: 'sans-serif', maxWidth: 480, margin: '40px auto' }}>
+      <h1>Fullstack Test App</h1>
+      <p>API base URL: {API_BASE_URL}</p>
+      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      <form onSubmit={addItem}>
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Item name" />
+        <button type="submit">Add</button>
+      </form>
+      <ul>
+        {items.map((item) => (
+          <li key={item.id}>{item.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default App;
