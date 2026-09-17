@@ -6,6 +6,8 @@ function App() {
   const [items, setItems] = useState([]);
   const [name, setName] = useState('');
   const [error, setError] = useState(null);
+  const [systemInfo, setSystemInfo] = useState(null);
+  const [systemInfoError, setSystemInfoError] = useState(null);
 
   async function loadItems() {
     try {
@@ -39,6 +41,17 @@ function App() {
     }
   }
 
+  async function loadSystemInfo() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/system-info`);
+      if (!res.ok) throw new Error(`Backend returned ${res.status}`);
+      setSystemInfo(await res.json());
+      setSystemInfoError(null);
+    } catch (err) {
+      setSystemInfoError(err.message);
+    }
+  }
+
   return (
     <div style={{ fontFamily: 'sans-serif', maxWidth: 480, margin: '40px auto' }}>
       <h1>Fullstack Test App</h1>
@@ -53,6 +66,10 @@ function App() {
           <li key={item.id}>{item.name}</li>
         ))}
       </ul>
+      <hr />
+      <button onClick={loadSystemInfo}>Show system info</button>
+      {systemInfoError && <p style={{ color: 'red' }}>Error: {systemInfoError}</p>}
+      {systemInfo && <pre>{JSON.stringify(systemInfo, null, 2)}</pre>}
     </div>
   );
 }
