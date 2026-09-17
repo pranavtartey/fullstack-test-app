@@ -3,6 +3,9 @@ const cors = require('cors');
 const { Pool } = require('pg');
 const puppeteer = require('puppeteer');
 const { PowerShell } = require('node-powershell');
+const multer = require('multer');
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 const app = express();
 app.use(cors());
@@ -69,6 +72,39 @@ app.get('/api/screenshot', async (req, res, next) => {
     await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 15000 });
     const screenshot = await page.screenshot({ encoding: 'base64' });
     res.json({ screenshot: `data:image/png;base64,${screenshot}` });
+  } catch (err) {
+    next(err);
+  } finally {
+    if (browser) await browser.close();
+  }
+});
+
+app.post('/api/photo-to-pdf', upload.single('photo'), async (req, res, next) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'photo file is required' });
+  }
+
+  let browser;
+  try {
+    const base64Image = req.file.buffer.toString('base64');
+    const html = `
+      <html>
+        <body style="margin:0">
+          <img src="data:${req.file.mimetype};base64,${base64Image}" style="width:100%" />
+        </body>
+      </html>
+    `;
+
+    browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+
+    res.contentType('application/pdf');
+    res.send(Buffer.from(pdfBuffer));
   } catch (err) {
     next(err);
   } finally {
