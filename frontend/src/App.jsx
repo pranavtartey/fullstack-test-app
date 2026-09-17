@@ -8,6 +8,8 @@ function App() {
   const [error, setError] = useState(null);
   const [systemInfo, setSystemInfo] = useState(null);
   const [systemInfoError, setSystemInfoError] = useState(null);
+  const [screenshot, setScreenshot] = useState(null);
+  const [screenshotError, setScreenshotError] = useState(null);
 
   async function loadItems() {
     try {
@@ -52,6 +54,18 @@ function App() {
     }
   }
 
+  async function loadScreenshot() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/screenshot?url=https://example.com`);
+      if (!res.ok) throw new Error(`Backend returned ${res.status}`);
+      const data = await res.json();
+      setScreenshot(data.screenshot);
+      setScreenshotError(null);
+    } catch (err) {
+      setScreenshotError(err.message);
+    }
+  }
+
   return (
     <div style={{ fontFamily: 'sans-serif', maxWidth: 480, margin: '40px auto' }}>
       <h1>Fullstack Test App</h1>
@@ -70,6 +84,10 @@ function App() {
       <button onClick={loadSystemInfo}>Show system info</button>
       {systemInfoError && <p style={{ color: 'red' }}>Error: {systemInfoError}</p>}
       {systemInfo && <pre>{JSON.stringify(systemInfo, null, 2)}</pre>}
+      <hr />
+      <button onClick={loadScreenshot}>Take screenshot</button>
+      {screenshotError && <p style={{ color: 'red' }}>Error: {screenshotError}</p>}
+      {screenshot && <img src={screenshot} alt="screenshot" style={{ maxWidth: '100%' }} />}
     </div>
   );
 }
