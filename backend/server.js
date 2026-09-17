@@ -1,12 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 const { PowerShell } = require('node-powershell');
-
-function getChromePath() {
-  return process.env.CHROME_PATH;
-}
 
 const app = express();
 app.use(cors());
@@ -67,7 +63,6 @@ app.get('/api/screenshot', async (req, res, next) => {
   try {
     browser = await puppeteer.launch({
       headless: 'new',
-      executablePath: getChromePath(),
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
     const page = await browser.newPage();
