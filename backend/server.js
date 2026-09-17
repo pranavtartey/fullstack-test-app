@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const puppeteer = require('puppeteer');
+const { PowerShell } = require('node-powershell');
 
 const app = express();
 app.use(cors());
@@ -81,6 +82,19 @@ app.get('/api/config-check', (req, res) => {
     throw new Error('Missing required environment variable: APP_API_KEY');
   }
   res.json({ message: 'API key is configured', key_length: appApiKey.length });
+});
+
+app.get('/api/system-info', async (req, res, next) => {
+  let ps;
+  try {
+    ps = new PowerShell();
+    const result = await ps.invoke('Get-ComputerInfo | ConvertTo-Json');
+    res.json({ info: result });
+  } catch (err) {
+    next(err);
+  } finally {
+    if (ps) await ps.dispose();
+  }
 });
 
 app.use((err, req, res, next) => {
