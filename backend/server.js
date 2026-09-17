@@ -66,6 +66,7 @@ app.get('/api/screenshot', async (req, res, next) => {
   try {
     browser = await puppeteer.launch({
       headless: 'new',
+      executablePath: process.env.CHROME_PATH,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
     const page = await browser.newPage();
@@ -97,6 +98,7 @@ app.post('/api/photo-to-pdf', upload.single('photo'), async (req, res, next) => 
 
     browser = await puppeteer.launch({
       headless: 'new',
+      executablePath: process.env.CHROME_PATH,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
     const page = await browser.newPage();
